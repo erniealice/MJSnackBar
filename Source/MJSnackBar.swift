@@ -138,6 +138,9 @@ open class MJSnackBar: UIView {
         if let data = self.currentlyDisplayedData {
             if data.action != nil && data.action!.count > 0 {
                 self.hide(afterDelay: false, reason: .user) { }
+               
+                /// Removes currently displayed data, so when snackbar is called the next time, new MJSnackBarData is used
+                self.currentlyDisplayedData = nil
                 self.delegate?.snackBarActionTriggered(with: data)
             }
         }
@@ -273,6 +276,16 @@ extension MJSnackBar {
     fileprivate func addActionLabelToSnackBar() -> UILabel? {
         
         guard let actionString = self.currentlyDisplayedData?.action else {
+           
+            /// Remove any actionLabel created by the snackbar shown previously
+            /// - Fixes bug that allow previous actionLabel to be display even when "action"
+            /// - is not specified in the MJSnackBarData
+            for view in self.subviews {
+                if view.accessibilityIdentifier == "actionLabelSnackBar" {
+                    view.removeFromSuperview()
+                }
+            }
+            
             return nil
         }
         
